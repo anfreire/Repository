@@ -51,6 +51,30 @@ function check_file_changed() {
     fi
 }
 
+function execute_commands() {
+    local commands=("${@}")
+    for command in "${commands[@]}"; do
+        $command > /dev/null 2>&1
+    done
+}
+
 check_file_changed "Spotify_Linux" "Spotify_Linux.sh" "curl -o Spotify_Linux.sh https://raw.githubusercontent.com/SpotX-CLI/SpotX-Linux/main/install.sh" "chmod +x Spotify_Linux.sh"
 check_file_changed "Spotify_Mac" "Spotify_Mac.sh" "curl -o Spotify_Mac.sh https://raw.githubusercontent.com/SpotX-CLI/SpotX-Mac/main/install.sh" "chmod +x Spotify_Mac.sh"
 check_file_changed "Spotify_Windows" "Spotify_Windows.bat" "curl -o Spotify_Windows.bat https://raw.githubusercontent.com/mrpond/BlockTheSpot/master/BlockTheSpot.bat"
+check_file_changed "Windows_Tools" "Windows_Tools.bat" "curl -o Windows_Tools.bat https://raw.githubusercontent.com/massgravel/Microsoft-Activation-Scripts/master/MAS/All-In-One-Version/MAS_AIO.cmd"
+check_file_changed "Office - 32bit" "Office/32bit/Office_32.zip" \
+"curl -o Office/32bit/bin.exe https://github.com/aesticode/microsoft-office-2021/raw/main/Office2021/bin.exe" \
+"curl -o Office/32bit/Install_Essential.bat https://raw.githubusercontent.com/aesticode/microsoft-office-2021/main/Office2021/Install-x32-basic.bat" \
+"curl -o Office/32bit/Install_Bloated.bat https://github.com/aesticode/microsoft-office-2021/blob/main/Office2021/Install-x32.bat" \
+"curl -o Office/32bit/Activator.bat https://raw.githubusercontent.com/aesticode/microsoft-office-2021/main/Office2021/Activator.bat" \
+"curl -o Office/32bit/configuration/configuration-x32-basic.xml https://github.com/aesticode/microsoft-office-2021/blob/main/Office2021/configuration/configuration-x32-basic.xml" \
+"curl -o Office/32bit/configuration/configuration-x32.xml https://raw.githubusercontent.com/aesticode/microsoft-office-2021/main/Office2021/configuration/configuration-x32.xml" \
+execute_commands "cd Office/32bit" "zip -r Office_32.zip ./* -x Office_32.zip"  "cd ../.."
+check_file_changed "Office - 64bit" "Office/64bit/Office_64.zip" \
+"curl -o Office/64bit/bin.exe https://github.com/aesticode/microsoft-office-2021/raw/main/Office2021/bin.exe" \
+"curl -o Office/64bit/Install_Essential.bat https://raw.githubusercontent.com/aesticode/microsoft-office-2021/main/Office2021/Install-x64-basic.bat" \
+"curl -o Office/64bit/Install_Bloated.bat https://github.com/aesticode/microsoft-office-2021/blob/main/Office2021/Install-x64.bat" \
+"curl -o Office/64bit/Activator.bat https://raw.githubusercontent.com/aesticode/microsoft-office-2021/main/Office2021/Activator.bat" \
+"curl -o Office/64bit/configuration/configuration-x64-basic.xml https://github.com/aesticode/microsoft-office-2021/blob/main/Office2021/configuration/configuration-x64-basic.xml" \
+"curl -o Office/64bit/configuration/configuration-x64.xml https://raw.githubusercontent.com/aesticode/microsoft-office-2021/main/Office2021/configuration/configuration-x64.xml" \
+execute_commands "cd Office/64bit" "zip -r Office_64.zip ./* -x Office_64.zip"  "cd ../.."
