@@ -1,3 +1,7 @@
+**Last update: 29/05/2023**
+
+&nbsp;
+
 # Windows
 
 Script with various tools for Windows such as activation, changing edition, etc.
@@ -6,8 +10,11 @@ Script with various tools for Windows such as activation, changing edition, etc.
 
 [Source](https://github.com/massgravel/Microsoft-Activation-Scripts)
 
+&nbsp;
 
 ---
+
+&nbsp;
 
 # Microsoft Office
 
@@ -19,16 +26,40 @@ Collection of scripts for Microsoft Office to install and activate.
 
 [Source](https://github.com/aesticode/microsoft-office-2021)
 
+&nbsp;
+
 ---
+
+&nbsp;
 
 # Spotiy
 
 Disables Spotify ads on Windows, Linux and macOS.
 
-||Linux|MacOS|Windows|
-|---|---|---|---|
-|Script|[Script - Linux](https://anfreire.github.io/Repository/Spotify/Linux/Spotify_Linux.sh)|[Script - MacOS](https://anfreire.github.io/Repository/Spotify/macOS/Spotify_Mac.sh)|[Script - Windows](https://anfreire.github.io/Repository/Spotify/Windows/Spotify_Windows.bat)|
-|Source|[Source - Linux](https://github.com/SpotX-CLI/SpotX-Linux)|[Source - MacOS](https://github.com/SpotX-CLI/SpotX-Mac)|[Source - Windows](https://github.com/mrpond/BlockTheSpot)|
+|Linux|MacOS|Windows|
+|---|---|---|
+|[Script](https://anfreire.github.io/Repository/Spotify/Linux/Spotify_Linux.sh)|[Script](https://anfreire.github.io/Repository/Spotify/macOS/Spotify_Mac.sh)|[Script](https://anfreire.github.io/Repository/Spotify/Windows/Spotify_Windows.bat)|
+|[Source](https://github.com/SpotX-CLI/SpotX-Linux)|[Source](https://github.com/SpotX-CLI/SpotX-Mac)|[Source](https://github.com/mrpond/BlockTheSpot)|
 
+&nbsp;
 
 ---
+
+&nbsp;
+
+# Youtube
+
+## Android
+
+Disables Youtube ads on Android and allows background playback.
+
+```
+For both versions, you need to install the Dependency, aka MicroG.
+
+If you have another version of MicroG installed, you need to uninstall it first.
+```
+
+|Youtube|Youtube Music|Dependency|
+|---|---|---|
+|[APK](https://github.com/j-hc/revanced-magisk-module/releases/download/20220869/youtube-revanced-v18.19.35-all.apk)|[APK](https://github.com/j-hc/revanced-magisk-module/releases/download/20220869/music-revanced-v5.39.52-arm64-v8a.apk)|[APK](https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk)|
+|[Source](https://github.com/j-hc/revanced-magisk-module)|[Source](https://github.com/j-hc/revanced-magisk-module)|[Source](https://github.com/TeamVanced/VancedMicroG)|
