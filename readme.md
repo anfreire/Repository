@@ -1,6 +1,6 @@
 # Windows
 
-Collection of scripts for Windows such as activation, changing edition, etc.
+Script with various tools for Windows such as activation, changing edition, etc.
 
 [Script](https://anfreire.github.io/Repository/Windows/Windows_Tools.bat)
 
