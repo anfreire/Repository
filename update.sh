@@ -58,10 +58,10 @@ function execute_commands() {
     done
 }
 
-check_file_changed "Spotify_Linux" "Spotify_Linux.sh" "curl -o Spotify_Linux.sh https://raw.githubusercontent.com/SpotX-CLI/SpotX-Linux/main/install.sh" "chmod +x Spotify_Linux.sh"
-check_file_changed "Spotify_Mac" "Spotify_Mac.sh" "curl -o Spotify_Mac.sh https://raw.githubusercontent.com/SpotX-CLI/SpotX-Mac/main/install.sh" "chmod +x Spotify_Mac.sh"
-check_file_changed "Spotify_Windows" "Spotify_Windows.bat" "curl -o Spotify_Windows.bat https://raw.githubusercontent.com/mrpond/BlockTheSpot/master/BlockTheSpot.bat"
-check_file_changed "Windows_Tools" "Windows_Tools.bat" "curl -o Windows_Tools.bat https://raw.githubusercontent.com/massgravel/Microsoft-Activation-Scripts/master/MAS/All-In-One-Version/MAS_AIO.cmd"
+check_file_changed "Spotify_Linux" "Spotify/Linux/Spotify_Linux.sh" "curl -o Spotify/Linux/Spotify_Linux.sh https://raw.githubusercontent.com/SpotX-CLI/SpotX-Linux/main/install.sh" "chmod +x Spotify/Linux/Spotify_Linux.sh"
+check_file_changed "Spotify_Mac" "Spotify/macOS/Spotify_Mac.sh" "curl -o Spotify/macOS/Spotify_Mac.sh https://raw.githubusercontent.com/SpotX-CLI/SpotX-Mac/main/install.sh" "chmod +x Spotify/macOS/Spotify_Mac.sh"
+check_file_changed "Spotify_Windows" "Spotify/Windows/Spotify_Windows.bat" "curl -o Spotify/Windows/Spotify_Windows.bat https://raw.githubusercontent.com/mrpond/BlockTheSpot/master/BlockTheSpot.bat"
+check_file_changed "Windows_Tools" "Windows/Windows_Tools.bat" "curl -o Windows/Windows_Tools.bat https://raw.githubusercontent.com/massgravel/Microsoft-Activation-Scripts/master/MAS/All-In-One-Version/MAS_AIO.cmd"
 check_file_changed "Office - 32bit" "Office/32bit/Office_32.zip" \
 "curl -o Office/32bit/bin.exe https://github.com/aesticode/microsoft-office-2021/raw/main/Office2021/bin.exe" \
 "curl -o Office/32bit/Install_Essential.bat https://raw.githubusercontent.com/aesticode/microsoft-office-2021/main/Office2021/Install-x32-basic.bat" \
