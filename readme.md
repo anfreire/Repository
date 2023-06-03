@@ -32,7 +32,7 @@ Collection of scripts for Microsoft Office to install and activate.
 
 &nbsp;
 
-# Spotiy
+# Spotify
 
 Disables Spotify ads on Windows, Linux and macOS.
 
