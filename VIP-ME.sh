@@ -23,8 +23,9 @@ function replace_in_main() {
 
 function remove_suffix() {
     local path=$1
-    if [[ $path == */ ]]; then
-        path="${path::-1}"
+    local suffix=$2
+    if [[ $path == *"$suffix" ]]; then
+        path="${path::-${#suffix}}"
     fi
     echo $path
 }
@@ -54,31 +55,45 @@ function adjust_path() {
 echo -e -n "Enter the path of 42-EXAM directory: "
 read path
 
-path=$(remove_suffix $path)
+path=$(remove_suffix $path "/")
 
 path=$(adjust_path $path)
+
+ERROR=""
 
 if [ -d "$path" ]; then
     EXAM_PATH="$path"
 else
-    echo -e "${RED_BOLD}No such directory${RESET}"
-    exit 1
+    ERROR="${RED_BOLD}No such directory${RESET}"
 fi
 
-if [ -d "$EXAM_PATH/$FOLDER_SUFX_1" ]; then
+if [ -z "$ERROR"] && [ -d "$EXAM_PATH/$FOLDER_SUFX_1" ]; then
     EXAM_PATH="$EXAM_PATH/$FOLDER_SUFX_1"
 fi
-if [ -d "$EXAM_PATH/$FOLDER_SUFX_2" ]; then
+
+if [ -z "$ERROR"] && [ -d "$EXAM_PATH/$FOLDER_SUFX_2" ]; then
     EXAM_PATH="$EXAM_PATH/$FOLDER_SUFX_2"
 else
-    echo -e "${RED_BOLD}This directory is not the 42-EXAM directory${RESET}: ${WHITE_BOLD}$EXAM_PATH${RESET}"
-    exit 1
+    ERROR="${RED_BOLD}This directory is not the 42-EXAM directory${RESET}: ${WHITE_BOLD}$EXAM_PATH${RESET}"
 fi
-if [ -f "$EXAM_PATH/$FILE_SUFX" ]; then
+
+if [ -z "$ERROR" ] && [ -f "$EXAM_PATH/$FILE_SUFX" ]; then
     MAIN_FILE="$EXAM_PATH/$FILE_SUFX"
 else
-    echo -e "${RED_BOLD}Can't find the main file${RESET}: ${WHITE_BOLD}$EXAM_PATH/$FILE_SUFX${RESET}"
-    exit 1
+    ERROR="${RED_BOLD}Can't find the main file${RESET}: ${WHITE_BOLD}$EXAM_PATH/$FILE_SUFX${RESET}"
+fi
+
+if [ ! -z "$ERROR" ]; then
+    echo -e "$ERROR"
+    echo -n "Do you want to clone the repo? (y/n): "
+    read answer
+    if [ "$answer" == "y" ]; then
+        git clone https://github.com/JCluzet/42_EXAM 42-EXAM-MOD
+        MAIN_FILE="$PWD/42-EXAM-MOD/$FOLDER_SUFX_2/$FILE_SUFX"
+        EXAM_PATH="$PWD/42-EXAM-MOD/$FOLDER_SUFX_2"
+    else
+        exit 1
+    fi
 fi
 
 remove_from_main "$TO_RM_1"
@@ -91,3 +106,6 @@ if grep -q "$TO_RM_1" "$MAIN_FILE" || grep -q "$TO_RM_2" "$MAIN_FILE" || ! grep 
 fi
 
 echo -e "${GREEN_BOLD}Done${RESET}: ${WHITE_BOLD}$EXAM_PATH/$FILE_SUFX${RESET} was updated"
+
+EXAM_PATH=$(remove_suffix $EXAM_PATH "/$FOLDER_SUFX_2")
+echo -e "${GREEN_BOLD}To compile the program, use the command: ${WHITE_BOLD}cd $EXAM_PATH; make${RESET}"
