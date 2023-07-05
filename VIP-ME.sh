@@ -108,4 +108,4 @@ fi
 echo -e "${GREEN_BOLD}Done${RESET}: ${WHITE_BOLD}$EXAM_PATH/$FILE_SUFX${RESET} was updated"
 
 EXAM_PATH=$(remove_suffix $EXAM_PATH "/$FOLDER_SUFX_2")
-echo -e "${GREEN_BOLD}To compile the program, use the command: ${WHITE_BOLD}cd $EXAM_PATH; make${RESET}"
+echo -e "${GREEN_BOLD}To compile the program, use the command: ${WHITE_BOLD}cd $EXAM_PATH && make${RESET}"
