@@ -1,5 +1,36 @@
 **Last update: 29/05/2023**
 
+
+&nbsp;
+
+# 42
+
+## Get more space on the 42 Computer
+
+**bash** / **zsh**
+```
+bash <(curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/FREE_SPACE_42.sh)
+```
+**fish**
+```
+bash (curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/FREE_SPACE_42.sh | psub)
+```
+
+## Get VIP on grademe
+
+**bash** / **zsh**
+```
+bash <(curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/VIP-ME.sh)
+```
+**fish**
+```
+bash (curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/VIP-ME.sh | psub)
+```
+
+&nbsp;
+
+---
+
 &nbsp;
 
 # Windows
