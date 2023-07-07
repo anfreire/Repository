@@ -1,189 +1,228 @@
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/select.h>
+#include <sys/time.h>
 
-#define UNUSED      -1
-#define LEFT        -2
-#define MAX_CLIENTS 1000
-#define BUFFER_SIZE 4096
+#define MAX_CLIENTS 10
+#define BUFFER_SIZE 40
 #define ERR_ARGS    "Wrong number of arguments\n"
 #define ERR_SYS     "Fatal error\n"
-#define MSG_CNCT    "server: client %d just arrived\n"
-#define MSG_LEFT    "server: client %d just left\n"
-#define MSG_CLIENT  "client %d: %s\n"
+#define ERR_ALLOC   "Fatal error\n"
+#define UNUSED      -2
+#define LEFT        -1
+#define LOG_CNCT    "server: client %d just arrived\n"
+#define LOG_DSCNT  "server: client %d just left\n"
+#define MSG_CLIENT_1 "client "
+#define MSG_CLIENT_2 ": "
 
 typedef struct client
 {
-    int socket;
-    int id;
+    int fd;
+    char *buffer;
 } client;
 
-void broadcast(char *buffer, client *clients, int ignoreFd)
+void error(char *type)
+{
+    write(STDERR_FILENO, type, strlen(type));
+    exit(1);
+}
+
+void    broadcast(char *msg, client *clients, int ignoreSocket)
 {
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
-        if (clients[i].socket != ignoreFd && clients[i].socket != UNUSED && clients[i].id != LEFT)
-        {
-            send(clients[i].socket, buffer, strlen(buffer), 0);
-        }
+        if (clients[i].fd >= 0 && clients[i].fd != ignoreSocket)
+            send(clients[i].fd, msg, strlen(msg), 0);
     }
-}
-
-char **parseMsg(char *msg)
-{
-    char **parsedMsg = NULL;
-    int i = 0;
-    while (msg && *msg)
-    {
-        parsedMsg = realloc(parsedMsg, sizeof(char *) * (i + 1));
-        parsedMsg[i] = NULL;
-        int j = 0;
-        while (msg[j] && msg[j] != '\n')
-        {
-            parsedMsg[i] = realloc(parsedMsg[i], sizeof(char) * (j + 1));
-            parsedMsg[i][j] = msg[j];
-            j++;
-        }
-        parsedMsg[i] = realloc(parsedMsg[i], sizeof(char) * (j + 1));
-        parsedMsg[i][j] = '\0';
-        if (msg[j] == '\n')
-            j++;
-        msg += j;
-        i++;
-    }
-    parsedMsg = realloc(parsedMsg, sizeof(char *) * (i + 1));
-    parsedMsg[i] = NULL;
-    return parsedMsg;
 }
 
 int getId(client *clients, int socket)
 {
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
-        if (clients[i].socket == socket)
-            return clients[i].id;
+        if (clients[i].fd == socket)
+            return i;
     }
     return -1;
 }
 
-int main(int argc, char **argv) 
+int extract_message(char **buf, char **msg)
 {
-    if (argc != 2) 
+	char	*newbuf;
+	int	i;
+
+	*msg = 0;
+	if (*buf == 0)
+		return (0);
+	i = 0;
+	while ((*buf)[i])
+	{
+		if ((*buf)[i] == '\n')
+		{
+			newbuf = calloc(1, sizeof(*newbuf) * (strlen(*buf + i + 1) + 1));
+			if (newbuf == 0)
+				return (-1);
+			strcpy(newbuf, *buf + i + 1);
+			*msg = *buf;
+			(*msg)[i + 1] = 0;
+			*buf = newbuf;
+			return (1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+char *str_join(char *buf, char *add, int freeBuf)
+{
+	char	*newbuf;
+	int		len;
+
+	if (buf == 0)
+		len = 0;
+	else
+		len = strlen(buf);
+	newbuf = malloc(sizeof(*newbuf) * (len + strlen(add) + 1));
+	if (newbuf == 0)
+		return (0);
+	newbuf[0] = 0;
+	if (buf != 0)
+		strcat(newbuf, buf);
+    if (freeBuf)
+	    free(buf);
+	strcat(newbuf, add);
+	return (newbuf);
+}
+
+void    handleMsg(client *clients, client *this)
+{
+    char *msg = NULL;
+    if (this->buffer == NULL)
+        return ;
+    int ret = extract_message(&this->buffer, &msg);
+    if (ret < 0)
+        error(ERR_ALLOC);
+    char id[10];
+    sprintf(id, "%d", getId(clients, this->fd));
+    while (ret == 1)
     {
-        write(2, ERR_ARGS, strlen(ERR_ARGS));
-        exit(1);
+        char *finalMsg = str_join(MSG_CLIENT_1, id, 0);
+        finalMsg = str_join(finalMsg, MSG_CLIENT_2, 1);
+        finalMsg = str_join(finalMsg, msg, 1);
+        broadcast(finalMsg, clients, this->fd);
+        free(finalMsg);
+        free(msg);
+        ret = extract_message(&this->buffer, &msg);
+        if (ret < 0)
+            error(ERR_ALLOC);
     }
-    client clients[MAX_CLIENTS];
+    if (this->buffer && strlen(this->buffer) == 0)
+    {
+        free(this->buffer);
+        this->buffer = NULL;
+    }
+}
+
+int main(int ac, char **av)
+{
+    if (ac < 2)
+        error(ERR_ARGS);
+    char buffer[BUFFER_SIZE];
+    int serverSocket;
+    client  clients[MAX_CLIENTS];
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
-        clients[i].socket = UNUSED;
-        clients[i].id = UNUSED;
+        clients[i].fd = UNUSED;
+        clients[i].buffer = NULL;
     }
-    fd_set activeSockets, readySockets;
-    char buffer[BUFFER_SIZE];
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (serverSocket < 0) 
-    {
-        write(2, ERR_SYS, strlen(ERR_SYS));
-        exit(1);
-    }
-
     struct sockaddr_in serverAddress = {0};
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    serverAddress.sin_port = htons(atoi(argv[1]));
-
-    if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) 
-    {
-        write(2, ERR_SYS, strlen(ERR_SYS));
-        exit(1);
-    }
-
-    if (listen(serverSocket, MAX_CLIENTS) < 0) 
-    {
-        write(2, ERR_SYS, strlen(ERR_SYS));
-        exit(1);
-    }
-
-    FD_ZERO(&activeSockets);
-    FD_SET(serverSocket, &activeSockets);
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serverSocket < 0)
+        error(ERR_SYS);
+    serverAddress.sin_family = AF_INET; 
+	serverAddress.sin_addr.s_addr = htonl(2130706433);
+	serverAddress.sin_port = htons(atoi(av[1]));
+    if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
+        error(ERR_SYS);
+    if (listen(serverSocket, MAX_CLIENTS) < 0)
+        error(ERR_SYS);
     int maxSocket = serverSocket;
-    while (1) 
+    fd_set tmp_sockets, sockets;
+    FD_ZERO(&sockets);
+    FD_SET(serverSocket, &sockets);
+    while (1)
     {
-        readySockets = activeSockets;
-        if (select(maxSocket + 1, &readySockets, NULL, NULL, NULL) < 0) 
+        tmp_sockets = sockets;
+        if (select(maxSocket + 1, &tmp_sockets, NULL, NULL, NULL) < 0)
+            error(ERR_SYS);
+        for (int clientSocket = 0; clientSocket < MAX_CLIENTS; clientSocket++)
         {
-            perror("Error in select");
-            exit(1);
-        }
-
-        for (int socketId = 0; socketId <= maxSocket; socketId++) 
-        {
-            if (FD_ISSET(socketId, &readySockets)) 
+            if (FD_ISSET(clientSocket, &tmp_sockets))
             {
-                if (socketId == serverSocket) 
+                if (clientSocket == serverSocket)
                 {
-                    int clientSocket = accept(serverSocket, NULL, NULL);
-                    if (clientSocket < 0) 
-                    {
-                        perror("Error accepting client connection");
-                        exit(1);
-                    }
-
-                    FD_SET(clientSocket, &activeSockets);
-                    maxSocket = (clientSocket > maxSocket) ? clientSocket : maxSocket;
+                    int newClient = accept(clientSocket, NULL, NULL);
+                    if (newClient < 0)
+                        error(ERR_SYS);
+                    if (newClient > maxSocket)
+                        maxSocket = newClient;
+                    FD_SET(newClient, &sockets);
                     for (int i = 0; i < MAX_CLIENTS; i++)
                     {
-                        if (clients[i].socket == -1)
+                        if (clients[i].fd == UNUSED)
                         {
-                            clients[i].socket = clientSocket;
-                            clients[i].id = i;
+                            clients[i].fd = newClient;
+                            memset(buffer, 0, BUFFER_SIZE);
+                            sprintf(buffer, LOG_CNCT, i);
+                            broadcast(buffer, clients, newClient);
                             break;
                         }
                     }
-                    sprintf(buffer, MSG_CNCT, getId(clients, clientSocket));
-                    broadcast(buffer, clients, -1);
-                } 
-                else 
+                }
+                else
                 {
-                    char    msg[BUFFER_SIZE];
-                    int bytesRead = recv(socketId, msg, BUFFER_SIZE, 0);
-                    if (bytesRead <= 0) 
+                    char msg[BUFFER_SIZE + 1];
+                    memset(msg, 0, BUFFER_SIZE + 1);
+                    int readBytes = recv(clientSocket, msg, BUFFER_SIZE, 0);
+                    if (readBytes < 0)
+                        error(ERR_SYS);
+                    if (readBytes == 0)
                     {
                         for (int i = 0; i < MAX_CLIENTS; i++)
                         {
-                            if (clients[i].socket == socketId)
+                            if (clients[i].fd == clientSocket)
                             {
-                                sprintf(msg, MSG_LEFT, clients[i].id);
-                                broadcast(msg, clients, socketId);
-                                clients[i].socket = LEFT;
-                                clients[i].id = LEFT;
+                                if (clients[i].buffer)
+                                    handleMsg(clients, &clients[i]);
+                                if (clients[i].buffer)
+                                    free(clients[i].buffer);
+                                memset(buffer, 0, BUFFER_SIZE);
+                                sprintf(buffer, LOG_DSCNT, i);
+                                broadcast(buffer, clients, clientSocket);
+                                clients[i].fd = LEFT;
                                 break;
                             }
                         }
-                        close(socketId);
-                        FD_CLR(socketId, &activeSockets);
-                    } 
-                    else 
+                        FD_CLR(clientSocket, &sockets);
+                        close(clientSocket);
+                    }
+                    else
                     {
-                        msg[bytesRead] = '\0';
-                        char **parsedMsg = parseMsg(msg);
-                        for (int i = 0; parsedMsg[i]; i++)
-                        {
-                            sprintf(msg, MSG_CLIENT, getId(clients, socketId), parsedMsg[i]);
-                            broadcast(msg, clients, socketId);
-                        }
-                        for (int i = 0; parsedMsg[i]; i++)
-                            free(parsedMsg[i]);
-                        free(parsedMsg);
+                        msg[readBytes] = 0;
+                        int allocatedBuf = 0;
+                        if (clients[getId(clients, clientSocket)].buffer)
+                            allocatedBuf = 1;
+                        clients[getId(clients, clientSocket)].buffer = str_join(clients[getId(clients, clientSocket)].buffer, msg, allocatedBuf);
                     }
                 }
             }
+            if (clients[getId(clients, clientSocket)].fd >= 0 && getId(clients, clientSocket) >= 0)
+                handleMsg(clients, &clients[getId(clients, clientSocket)]);
         }
     }
     return 0;
