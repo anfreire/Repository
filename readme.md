@@ -5,6 +5,18 @@
 
 # 42
 
+## Setup TS in a 42 computer
+
+**bash** / **zsh**
+```
+bash <(curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/setup_ts_42.sh)
+```
+
+**fish**
+```
+bash (curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/setup_ts_42.sh | psub)
+```
+
 ## Get more space on the 42 Computer
 
 **bash** / **zsh**
