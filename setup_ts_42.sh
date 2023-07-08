@@ -27,9 +27,10 @@ function updateNPM {
     npm install -g npm@latest
 }
 
-function getTS {
+function getTSandNest {
     npm init -y
     npm i typescript --save-dev
+    npm i @nestjs/cli --save-dev
     BIN_PATH="export PATH=$(pwd)/node_modules/.bin:\$PATH"
     if ! grep -q "$BIN_PATH" $ZSHRC; then
         echo $BIN_PATH >> $ZSHRC
@@ -70,8 +71,8 @@ echo -e "${GREEN}Updating NPM${RESET}"
 BLA::start_loading_animation "${BLA_big_dot[@]}"
 updateNPM > /dev/null 2>&1
 BLA::stop_loading_animation
-echo -e "${GREEN}Installing Typescript${RESET}"
+echo -e "${GREEN}Installing Typescript and NestJS${RESET}"
 BLA::start_loading_animation "${BLA_big_dot[@]}"
-getTS > /dev/null 2>&1
+getTSandNest > /dev/null 2>&1
 BLA::stop_loading_animation
 zsh -c "source ~/.zshrc; exec zsh"
