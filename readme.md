@@ -5,7 +5,7 @@
 
 # 42
 
-## Setup TS in a 42 computer
+## Setup TS and NestJS in a 42 computer
 
 **bash** / **zsh**
 ```
