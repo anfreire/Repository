@@ -17,17 +17,6 @@ bash <(curl -fL https://github.com/anfreire/Repository/raw/gh-pages/setup_ts_42.
 bash (curl -fL https://github.com/anfreire/Repository/raw/gh-pages/setup_ts_42.sh | psub)
 ```
 
-## Get more space on the 42 Computer
-
-**bash** / **zsh**
-```
-bash <(curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/FREE_SPACE_42.sh)
-```
-**fish**
-```
-bash (curl -fL https://raw.githubusercontent.com/anfreire/Repository/gh-pages/FREE_SPACE_42.sh | psub)
-```
-
 ## Get VIP on grademe
 
 **bash** / **zsh**
